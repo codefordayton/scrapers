@@ -7,8 +7,14 @@ Python Scrapy project used to collect open data on the web, powering our open da
 -------------
 Requires Python 2.7, Pip and probably virtualenv
 
+Installation
+===================
 ``` 
 pip install -r requirements.txt
-scrapy crawl dayton_local -o ../path/to/data_file.json -t json -s LOG_FILE=../path/to/scrapy.log -s LOG_LEVEL=WARNING
+scrapy crawl spider_name
 ```
 
+You can view the available spiders by running
+```scrapy list```
+
+Scraped data is output as JSON in 'feed.json'
