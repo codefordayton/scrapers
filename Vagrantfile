@@ -36,24 +36,22 @@ Vagrant::Config.run do |config|
   # folder, and the third is the path on the host to the actual folder.
   # config.vm.share_folder "v-data", "/vagrant_data", "../data"
 
+  config.vm.provider :virtualbox do |vb|
+    # This allows symlinks to be created within the /vagrant root directory,
+    # which is something librarian-puppet needs to be able to do. This might
+    # be enabled by default depending on what version of VirtualBox is used.
+    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+  end
+
+  # This shell provisioner installs librarian-puppet and runs it to install
+  # puppet modules. This has to be done before the puppet provisioning so that
+  # the modules are available when puppet tries to parse its manifests.
+  config.vm.provision :shell, :path => "shell/main.sh"
+
   # Enable provisioning with Puppet stand alone.  Puppet manifests
   # are contained in a directory path relative to this Vagrantfile.
   # You will need to create the manifests directory and a manifest in
   # the file ..pp in the manifests_path directory.
-  #
-  # An example Puppet manifest to provision the message of the day:
-  #
-  # # group { "puppet":
-  # #   ensure => "present",
-  # # }
-  # #
-  # # File { owner => 0, group => 0, mode => 0644 }
-  # #
-  # # file { '/etc/motd':
-  # #   content => "Welcome to your Vagrant-built virtual machine!
-  # #               Managed by Puppet.\n"
-  # # }
-  #
   config.vm.provision :puppet do |puppet|
      puppet.manifests_path = "puppet/manifests"
      puppet.options = ['--verbose']
