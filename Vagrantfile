@@ -36,12 +36,12 @@ Vagrant::Config.run do |config|
   # folder, and the third is the path on the host to the actual folder.
   # config.vm.share_folder "v-data", "/vagrant_data", "../data"
 
-  config.vm.provider :virtualbox do |vb|
+#  config.vm.provider :virtualbox do |vb|
     # This allows symlinks to be created within the /vagrant root directory,
     # which is something librarian-puppet needs to be able to do. This might
     # be enabled by default depending on what version of VirtualBox is used.
-    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
-  end
+#    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+#  end
 
   # This shell provisioner installs librarian-puppet and runs it to install
   # puppet modules. This has to be done before the puppet provisioning so that
@@ -56,7 +56,7 @@ Vagrant::Config.run do |config|
      puppet.manifests_path = "puppet/manifests"
      puppet.options = ['--verbose']
      puppet.manifest_file  = "site.pp"
-     puppet.module_path = "puppet/modules"
+     #puppet.module_path = "puppet/modules"
   end
 
 end
