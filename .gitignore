@@ -37,4 +37,5 @@ nosetests.xml
 .pydevproject
 .idea
 *.json
-.vagrant
+.vagrant*
+python
