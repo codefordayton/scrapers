@@ -7,6 +7,7 @@ Exec["apt-update"] -> Package <| |>
 
 class { 'python':
   version    => '2.7',
+  pip        => true,
   dev        => true,
   virtualenv => true
 }
@@ -16,17 +17,14 @@ $mypackages = ["libxml2-dev", "libxslt-dev"]
 package {$mypackages:}
 
 python::virtualenv { '/home/vagrant/virtenv':
-  requirements => '/vagrant/requirements.txt',
   owner        => 'vagrant',
   group        => 'vagrant',
   cwd          => '/home/vagrant/virtenv',
-  timeout      => 1000000
+  distribute   => false,
+  timeout      => 10000
 }
 
-#python::pip {'scraper': virtualenv => '/home/vagrant/virtenv'}
-#
-#python::requirements { '/vagrant/requirements.txt':
-#  virtualenv => '/home/vagrant/virtenv',
-#  owner      => 'vagrant',
-#  group      => 'vagrant'
-#}
+#Hack to get requirements installed, since the python module doesn't seem to work
+exec {"pip_install_requirements":
+  command => "/home/vagrant/virtenv/bin/pip install -r /vagrant/requirements.txt"
+}
