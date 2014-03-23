@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Hack to remove 'stdin: is not a tty' messages
+# See 'https://github.com/mitchellh/vagrant/issues/1673#issuecomment-26650102'
+sed -i 's/^mesg n$/tty -s \&\& mesg n/g' /root/.profile
+
 # Directory in which librarian-puppet should manage its modules directory
 PUPPET_DIR=/etc/puppet/
 
@@ -33,7 +37,7 @@ fi
 if [ ! -d "$PUPPET_DIR" ]; then
   mkdir -p $PUPPET_DIR
 fi
-cp /vagrant/puppet/Puppetfile $PUPPET_DIR
+cp /vagrant/tools/puppet/Puppetfile $PUPPET_DIR
 
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   gem install librarian-puppet
