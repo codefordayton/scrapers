@@ -1,6 +1,6 @@
 __author__ = 'dwcaraway'
 
-from scrapy.spider import BaseSpider
+from scrapy.spider import Spider
 from scrapy.selector import Selector
 import urlparse
 import urllib2
@@ -9,7 +9,7 @@ import datetime
 from dayton.items import DaytonOhioPDFItem
 from scrapy.http import Request
 
-class DaytonOhioPDFSpider(BaseSpider):
+class DaytonOhioPDFSpider(Spider):
     """Crawls daytonohio.gov looking for PDF documents"""
     name = "daytonohio_rss_pdf"
     template_url = 'http://daytonohio.gov/Search/_layouts/srchrss.aspx?k=pdf&start=%d'

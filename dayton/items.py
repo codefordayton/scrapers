@@ -6,8 +6,6 @@
 from scrapy.item import Item, Field
 
 class DaytonlocalItem(Item):
-    # define the fields for your item here like:
-    # name = Field()
     name = Field()
     website = Field()
     logo = Field()
@@ -25,9 +23,16 @@ class DaytonlocalItem(Item):
     retrieved_on = Field()
 
 class DaytonOhioPDFItem(Item):
-    # define the fields for your item here like:
-    # name = Field()
     title = Field()
     url = Field()
     author = Field()
     pubDate = Field()
+
+class DaytonChamberItem(Item):
+    name = Field()
+    website = Field()
+    address = Field()
+    phone = Field()
+    category = Field()
+    data_source_url = Field()
+    retrieved_on = Field()

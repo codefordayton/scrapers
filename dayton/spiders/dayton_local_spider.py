@@ -1,6 +1,6 @@
 __author__ = 'dwcaraway'
 
-from scrapy.spider import BaseSpider
+from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
 import urlparse
@@ -14,7 +14,7 @@ facebook_matcher = re.compile('.*GoHere=(.*facebook.*)')
 twitter_matcher = re.compile('.*GoHere=(.*twitter.*)')
 category_matcher = re.compile('.*[.]com/(.*)[.]asp')
 
-class DaytonLocalSpider(BaseSpider):
+class DaytonLocalSpider(Spider):
     name = "dayton_local"
     allowed_domains = ["daytonlocal.com"]
     start_urls = [
