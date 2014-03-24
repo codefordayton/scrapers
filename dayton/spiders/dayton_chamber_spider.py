@@ -1,7 +1,7 @@
 __author__ = 'dwcaraway'
 
 from scrapy.spider import Spider
-from scrapy.selector import HtmlXPathSelector
+from scrapy.selector import Selector
 from scrapy.http import FormRequest
 from scrapy.contrib.loader import ItemLoader
 from scrapy import log
@@ -35,15 +35,11 @@ class DaytonLocalSpider(Spider):
         Takes the data out of the members entries
         """
 
-        sel = HtmlXPathSelector(response)
+        sel = Selector(response)
 
         items = []
 
         containers = sel.select('//div[@id="membersearchresults"]//div[@id="container"]')
-
-        #TODO invoking the shell, remove when done debugging
-        from scrapy.shell import inspect_response
-        inspect_response(response)
 
         for container in containers:
 
@@ -54,9 +50,32 @@ class DaytonLocalSpider(Spider):
 
             rows = container.css('div.row div.rightcol')
 
-            name = container.select('//div[contains(@class, "fn")]//strong/text()').extract()
-            # item['name'] = name[0] if name else None
-            #
+            item['name'] = rows[1].xpath('./strong/text()').extract()[0].strip()
+            item['category'] = rows[3].xpath('./text()').extract()[0].strip()
+            item['contact_name'] = rows[4].xpath('./text()').extract()[0].strip()
+            item['contact_title'] = rows[5].xpath('./text()').extract()[0].strip()
+
+            #Extract and split addresses
+            address = rows[6].xpath('./text()').extract()[0].strip()
+
+            item['address']
+
+            #Normalize phone numbers
+            try:
+                p = phonenumbers.parse(rows[7].xpath('./text()').extract()[0].strip(), 'US')
+                p = phonenumbers.normalize_digits_only(p)
+                item['phone'] = p
+            except Exception:
+                item['phone'] = None
+
+
+            item['website'] = rows[9].xpath('./a/ @href').extract()[0].strip()
+
+            #TODO invoking the shell, remove when done debugging
+            from scrapy.shell import inspect_response
+            inspect_response(response)
+
+
             # website = card.xpath('//*[contains(@class, "fn")]//a/ @href').extract()
             # item['website'] = website[0] if website else None
             #

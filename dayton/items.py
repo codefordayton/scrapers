@@ -36,3 +36,5 @@ class DaytonChamberItem(Item):
     category = Field()
     data_source_url = Field()
     retrieved_on = Field()
+    contact_name = Field()
+    contact_title = Field()
