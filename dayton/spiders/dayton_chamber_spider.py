@@ -1,8 +1,10 @@
 __author__ = 'dwcaraway'
 
 from scrapy.spider import Spider
-from scrapy.selector import Selector
+from scrapy.selector import HtmlXPathSelector
 from scrapy.http import FormRequest
+from scrapy.contrib.loader import ItemLoader
+from scrapy import log
 from scrapy.http import Request
 import urlparse
 import re
@@ -33,20 +35,26 @@ class DaytonLocalSpider(Spider):
         Takes the data out of the members entries
         """
 
-        sel = Selector(response)
-
-        item = DaytonChamberItem()
+        sel = HtmlXPathSelector(response)
 
         items = []
 
-        print len(sel.xpath('//div[@id="container"]'))
+        containers = sel.select('//div[@id="membersearchresults"]//div[@id="container"]')
 
-        # for card in sel.xpath('//div[@id="container"]'):
+        #TODO invoking the shell, remove when done debugging
+        from scrapy.shell import inspect_response
+        inspect_response(response)
 
-            # item['data_source_url'] = response.url
-            # item['retrieved_on'] = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-            #
-            # name = card.xpath('//*[contains(@class, "fn")]//strong/text()').extract()
+        for container in containers:
+
+            item = DaytonChamberItem()
+
+            item['data_source_url'] = response.url
+            item['retrieved_on'] = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+
+            rows = container.css('div.row div.rightcol')
+
+            name = container.select('//div[contains(@class, "fn")]//strong/text()').extract()
             # item['name'] = name[0] if name else None
             #
             # website = card.xpath('//*[contains(@class, "fn")]//a/ @href').extract()
@@ -112,7 +120,7 @@ class DaytonLocalSpider(Spider):
             #     if isinstance(v, basestring):
             #         item[k] = v.strip()
             #
-            # items.append(item)
+            items.append(item)
 
         return items
 
