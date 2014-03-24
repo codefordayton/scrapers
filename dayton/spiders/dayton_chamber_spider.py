@@ -42,34 +42,51 @@ class DaytonChamberSpider(Spider):
             rows = container.css('div.row')
 
             row_dict = {}
-            key = value = None
 
             for row in rows:
-                try:
-                    key = row.css('div.leftcol').xpath('./text()').extract()[0].strip()
+                key = row.css('div.leftcol').xpath('./text()').extract()
 
-                    try:
-                        value = row.css('div.rightcol').xpath('./text()').extract()[0].strip()
-                    except IndexError:
-                        value = row.css('div.rightcol').xpath('./text()').extract()[0].strip()
+                #TODO remove
+                print "key = %s"% key
 
-                        pass
+                if len(key) == 0:
+                    #TODO remove
+                    print "no key found"
+                    # No key, so don't bother looking for a value
+                    continue
 
-                except IndexError:
-                    pass
+                key = key[0].strip()
+
+                if key == 'Business Name:':
+                    value = row.css('div.rightcol').xpath('./strong/text()').extract()
+                elif key == 'Website:':
+                    value = row.xpath('./a/ @href').extract()
+                else:
+                    value = row.css('div.rightcol').xpath('./text()').extract()
+
+                if len(value) == 0:
+                    #TODO remove
+                    print "no value found"
+
+                    #No value, so don't bother storing
+                    continue
+
+                value = value[0].strip()
+
+                #Finally store the results in the dict
+                row_dict[key] = value
 
 
-
-
-            item['name'] = rows[1].xpath('./strong/text()').extract()[0].strip()
-            item['category'] = rows[3].xpath('./text()').extract()[0].strip()
-            item['contact_name'] = rows[4].xpath('./text()').extract()[0].strip()
-            item['contact_title'] = rows[5].xpath('./text()').extract()[0].strip()
-            item['address']= rows[6].xpath('./text()').extract()[0].strip()
+            item['name'] = row_dict.get('Business Name:', None)
+            item['category'] = row_dict.get('Business Category:', None)
+            item['contact_name'] = row_dict.get('Contact Name:', None)
+            item['contact_title'] = row_dict.get('Contact Title:', None)
+            item['address']= row_dict.get('Address:', None)
+            item['website'] = row_dict.get('Website:', None)
 
             #Normalize phone numbers
             try:
-                p_original = rows[7].xpath('./text()').extract()[0].strip()
+                p_original = row_dict.get('Phone Number:', None)
                 p = phonenumbers.parse(p_original, 'US')
                 p = phonenumbers.normalize_digits_only(p)
                 item['phone'] = p
@@ -78,15 +95,14 @@ class DaytonChamberSpider(Spider):
                 item['phone'] = p_original
 
             #TODO remove
-            from scrapy.shell import inspect_response
-            inspect_response(response)
-
-            item['website'] = rows[9].xpath('./a/ @href').extract()[0].strip()
+            # from scrapy.shell import inspect_response
+            # inspect_response(response)
 
             items.append(item)
 
             #TODO remove
-            self.log("item: %s" % item)
+            print row_dict
+            break
 
         return items
 
