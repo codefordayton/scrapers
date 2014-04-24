@@ -14,7 +14,7 @@ from items import LocalharvestItem, PickupPoint
 import phonenumbers
 
 class LocalHarvestSpider(Spider):
-    name = "none"
+    name = "CodeForDayton"
     allowed_domains = ["localharvest.org"]
     start_urls = [
         "http://www.localharvest.org/search.jsp?jmp&scale=9&lat=39.758948&lon=-84.191607&ty=6"
@@ -49,20 +49,17 @@ class LocalHarvestSpider(Spider):
         item = LocalharvestItem()
         pickupPoint = PickupPoint()
 
-#        item['pickups'] = {}
         item['name'] = sel.css('#listingbody h1 a').xpath('text()').extract()[0]
         item['description'] = sel.css('.textBlock p').xpath('text()').extract()[0]
 
         pickups = sel.xpath('//h4[text()="Pick Up / Drop Off Points"]/following-sibling::*').extract()
         for pickup in pickups:
-#          print pickup
           if len(pickup) > 5 and pickup.find('dottedline') == -1:
             #Title Line
             if pickup.find('img') > 0:
               # Get title
               mobj = re.search('<b>(.*?)</b>', pickup)
               if mobj:
-#                print mobj.groups()[0]
                 pickupPoint.name = mobj.groups()[0]
               # Get days
               mobj = re.search('\((.*)\)</span>', pickup)
@@ -105,12 +102,7 @@ class LocalHarvestSpider(Spider):
             pickupPoints.append(pickupPoint)
             pickupPoint = PickupPoint()
 
-#        item.pickups = dict(pickupPoints)
-#        print pickupPoints
-#        print dict(pickupPoints)
-#        item['pickups'] = {pickupPoints[i]: pickupPoints[i+1] for i in range(0, len(pickupPoints), 2)}
-        item['pickups'] = [dict(pickupPoints[0])]
-#        print pickupPoints
+        item['pickups'] = pickupPoints
         return item
 
 
