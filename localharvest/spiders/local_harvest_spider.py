@@ -20,23 +20,13 @@ class LocalHarvestSpider(Spider):
         "http://www.localharvest.org/search.jsp?jmp&scale=9&lat=39.758948&lon=-84.191607&ty=6"
     ]
 
+    download_delay = 2
+
     def parse(self, response):
         sel = Selector(response)
         links = sel.css('#content h4.inline a').xpath('@href').extract()
         link_req_objs = [Request(url="http://www.localharvest.org" + link, callback=self.extract) for link in links]
-        print link_req_objs
         return link_req_objs
-
-    def paginate(self, response):
-        sel = Selector(response)
-        links = sel.css('#content div.pagination a').xpath('@href').extract()
-        link_req_objs = [Request(url=link, callback=self.extract) for link in links]
-        next_url = sel.xpath("//a[text()='>>']/@href").extract()
-        if next_url:
-            link_req_objs.append(Request(url=urlparse.urljoin(response.url, next_url[0]), callback=self.paginate))
-
-        return link_req_objs
-
 
     def extract(self, response):
         """
@@ -93,7 +83,7 @@ class LocalHarvestSpider(Spider):
               if mobj:
                 pickupPoint.address = mobj.groups()[0]
               # Get City, State, Zip
-              mobj = re.search('<br>\s*(.*),\s(.*)\s(.*)', pickup)
+              mobj = re.search('<br>\s*(.*),\s(.*?)\s(.*)', pickup)
               if mobj:
                 pickupPoint.city = mobj.groups()[0]
                 pickupPoint.state = mobj.groups()[1]
@@ -102,7 +92,7 @@ class LocalHarvestSpider(Spider):
             pickupPoints.append(pickupPoint)
             pickupPoint = PickupPoint()
 
-        item['pickups'] = pickupPoints
+        item['pickups'] = ([p.__dict__ for p in pickupPoints])
         return item
 
 
