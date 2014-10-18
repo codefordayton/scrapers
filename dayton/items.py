@@ -38,3 +38,9 @@ class DaytonChamberItem(Item):
     retrieved_on = Field()
     contact_name = Field()
     contact_title = Field()
+
+class ReapItem(scrapy.Item):
+    parcelid = scrapy.Field()
+    parcellocation = scrapy.Field()
+    taxeligible = scrapy.Field()
+    paymentplan = scrapy.Field()
