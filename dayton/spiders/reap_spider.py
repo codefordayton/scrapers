@@ -9,7 +9,6 @@ import glob
 import csv
 import re
 
-
 class ReapSpider(scrapy.Spider):
     name = 'reap'
     allowed_domains = ['mctreas.org','mcohio.org']
@@ -47,6 +46,8 @@ class ReapSpider(scrapy.Spider):
 
         item = response.meta['item']
         item['taxeligible'] = re.sub('&nbsp', '', sel.xpath('//*[@id="content_middle_wide"]/table[2]/tr/td/table[3]/tr[2]/td[1]/text()').extract()[0]).strip()
+        if item['taxeligible'] == 'Eligible':
+          item['taxeligible'] = re.sub('&nbsp', '', sel.xpath('//*[@id="content_middle_wide"]/table[2]/tr/td/table[3]/tr[2]/td[2]/text()').extract()[0]).strip()
         request = scrapy.Request(response.url.replace('master.cfm', 'taxes.cfm'), callback=self.getPaymentPlan)
         request.meta['item'] = item
 
