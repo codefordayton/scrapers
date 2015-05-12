@@ -1,7 +1,6 @@
 import scrapy
 from scrapy.http import FormRequest
 from scrapy.selector import Selector
-from tutorial.items import ReapItem
 import urllib
 from urllib2 import urlparse
 import zipfile
@@ -9,6 +8,14 @@ import glob
 import csv
 import re
 
+from scrapy.item import Item, Field
+
+class ReapItem(Item):
+    parcelid = Field()
+    parcellocation = Field()
+    taxeligible = Field()
+    lastYear = Field()
+    paymentplan = Field()
 
 class ReapSpider(scrapy.Spider):
     name = 'reap'
@@ -58,8 +65,24 @@ class ReapSpider(scrapy.Spider):
         item['paymentplan'] = False
         for paymentplan in sel.xpath('//*[@id="content_middle_wide"]/div/form/div/tr/td/font/font/b/text()').extract():
             item['paymentplan'] = 'Unapplied Payments:' in paymentplan or item['paymentplan']
+        firstYear = None
+        item['lastYear'] = 2014 
+        rows = sel.xpath('//form/table[4]')
+        for tr in rows.xpath('tr'):
+            val = tr.xpath('td[1]/text()').extract()
+            if len(val) == 1:
+                year = int(val[0])
+            else:
+                continue
+            if firstYear is None:
+                item['lastYear'] = year - 1 
+                firstYear = year - 1 
+            val = tr.xpath('td[5]/text()').extract()
+            if len(val) == 1 and "$0.00" not in val[0]:
+                item['lastYear'] = year
+
         reapitems = csv.writer(open('reapitems.csv', 'ab'), delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        reapitems.writerow([item['parcelid'], item['parcellocation'], item['taxeligible'], item['paymentplan']])
+        reapitems.writerow([item['parcelid'], item['parcellocation'], item['taxeligible'], item['paymentplan'], item['lastYear']])
 
 # shamelessly copied from a stack overflow post
 def unzip(source_filename, dest_dir):
