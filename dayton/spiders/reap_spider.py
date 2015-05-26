@@ -61,14 +61,13 @@ class ReapSpider(scrapy.Spider):
         item['payment_plan'] = False
         
         for paymentXPath in sel.xpath('//*[@id="content_middle_wide"]/div[3]/form/table/tr'):
-            try:
-                data = paymentXPath.xpath('./td/text()').extract()
-                # if not an empty list
-                if data:
-                    date = datetime.strptime(data[0].strip(), '%m-%d-%Y')
-                    payment =  Decimal(re.sub(r'[^\d.]', '', data[1]))
-                    if date.year > datetime.today().year - 3 and payment > 0:
-                        item['payment_plan'] = True
+            data = paymentXPath.xpath('./td/text()').extract()
+            # if not an empty list, nor different size than 2, since the date might be omitted
+            if data and len(data) == 2:
+                date = datetime.strptime(data[0].strip(), '%m-%d-%Y')
+                payment =  Decimal(re.sub(r'[^\d.]', '', data[1]))
+                if date.year > datetime.today().year - 3 and payment > 0:
+                    item['payment_plan'] = True
         reapitems = csv.writer(open('reapitems.csv', 'ab'), delimiter=',', quoting=csv.QUOTE_MINIMAL)
         reapitems.writerow([item['parcel_id'], item['parcel_location'], item['tax_eligible'], item['payment_plan']])
 
