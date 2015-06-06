@@ -1,11 +1,12 @@
 import scrapy
 from scrapy.http import FormRequest
 from scrapy.selector import Selector
-from tutorial.items import ReapItem
+from ..items import ReapItem
 import urllib
 from urllib2 import urlparse
 import zipfile
 import glob
+import dbm
 import csv
 import re
 
@@ -15,9 +16,10 @@ class ReapSpider(scrapy.Spider):
     start_urls = [
         'http://www.mcohio.org/mctreas/fdpopup.cfm?dtype=DQ'
     ]
+    centroids = dbm.open('centroids.dbm')
 
     def parse(self, response):
-        
+
         delinquentLink = Selector(response).xpath('//*[@id="box1"]/td[1]/li/font/i/a/@href').extract()
         urllib.urlretrieve (urlparse.urljoin(response.url, delinquentLink[0]), 'delinquent.zip')
         unzip('delinquent.zip', 'delinquent')
@@ -39,6 +41,10 @@ class ReapSpider(scrapy.Spider):
                 if item['parcelid'].startswith('R72'):
                     request = scrapy.Request("http://mctreas.org/master.cfm?parid=" + item['parcelid'] + "&taxyr=2014" + "&own1=" + row[ownernamecol] + '\n', callback=self.getTaxEligibility)
                     request.meta['item'] = item
+                    centroid = self.centroids.get(item['parcelid'])
+                    if centroid:
+                        (item['parcellatitude'],
+                         item['parcellongitude']) = centroid.split()
                     yield request
 
     def getTaxEligibility(self, response):
