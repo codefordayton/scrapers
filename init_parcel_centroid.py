@@ -2,6 +2,12 @@
 """
 Given a parcel lines shapefile downloaded from
 http://www.mcauditor.org/downloads/gis_download_shape.cfm,
+
+that has been converted from Lambert_Conformal_Conic to D_WGS_1984 via
+the following command:
+
+ogr2ogr -t_srs EPSG:4326 out.shp in.shp
+
 this Python script creates a centroids.dbm file that contains the following
 (key,value) pairs:
     key: Shapefile record 'taxpinno'
@@ -65,8 +71,14 @@ def is_government(name):
 def init_parcel_centroid(argv):
     """Given a parcel lines shapefile downloaded from
     http://www.mcauditor.org/downloads/gis_download_shape.cfm,
-    this function creates a centroids.dbm file that contains the following
-    (key,value) pairs:
+
+    that has been converted from Lambert_Conformal_Conic to D_WGS_1984 via
+    the following command:
+
+    ogr2ogr -t_srs EPSG:4326 out.shp in.shp
+
+    this Python script creates a centroids.dbm file that contains the
+    following (key,value) pairs:
 
     key: Shapefile record 'taxpinno'
     value: Shapefile shape bounding box centroid (latitude, longitude)
