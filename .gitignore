@@ -39,3 +39,5 @@ nosetests.xml
 *.json
 .vagrant*
 python
+Shapefile*
+*db
