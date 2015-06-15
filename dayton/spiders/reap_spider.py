@@ -45,6 +45,9 @@ class ReapSpider(scrapy.Spider):
                     if centroid:
                         (item['parcellatitude'],
                          item['parcellongitude']) = centroid.split()
+                    else:
+                        (item['parcellatitude'],
+                         item['parcellongitude']) = (None, None)
                     yield request
 
     def getTaxEligibility(self, response):
@@ -66,7 +69,9 @@ class ReapSpider(scrapy.Spider):
         for paymentplan in sel.xpath('//*[@id="content_middle_wide"]/div/form/div/tr/td/font/font/b/text()').extract():
             item['paymentplan'] = 'Unapplied Payments:' in paymentplan or item['paymentplan']
         reapitems = csv.writer(open('reapitems.csv', 'ab'), delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        reapitems.writerow([item['parcelid'], item['parcellocation'], item['taxeligible'], item['paymentplan']])
+        reapitems.writerow([item['parcelid'], item['parcellocation'],
+                            item['taxeligible'], item['paymentplan'],
+                            item['parcellatitude'], item['parcellongitude']])
 
 # shamelessly copied from a stack overflow post
 def unzip(source_filename, dest_dir):
