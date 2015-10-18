@@ -1,4 +1,4 @@
-#!../venv/bin/python
+#!./YOUR_ENV_NAME/bin/python
 """
 Given a parcel lines shapefile downloaded from
 http://www.mcauditor.org/downloads/gis_download_shape.cfm,
@@ -104,17 +104,25 @@ def init_parcel_centroid(argv):
     for shape_record in shapefileobj.shapeRecords():
         record = initialize_record(fields,\
                                    shape_record)
-
-        record['name'] = record['name'].lower()
+        try:
+          record['name'] = record['name'].lower()
+        except:
+          print record['taxpinno']
 
         if re.match('^R72$', record['taxdistric']):
+            try:
+              if not is_government(record['name']):
+                  bbox = np.array(shape_record.shape.bbox)
 
-            if not is_government(record['name']):
-                bbox = np.array(shape_record.shape.bbox)
+                  centroids[record['taxpinno']] =\
+                      "%f %f" % (np.mean(bbox[1:4:2]),\
+                                 np.mean(bbox[0:4:2]))
+            except:
+              bbox = np.array(shape_record.shape.bbox)
 
-                centroids[record['taxpinno']] =\
-                    "%f %f" % (np.mean(bbox[1:4:2]),\
-                               np.mean(bbox[0:4:2]))
+              centroids[record['taxpinno']] =\
+                  "%f %f" % (np.mean(bbox[1:4:2]),\
+                             np.mean(bbox[0:4:2]))
 
     centroids.close()
 

@@ -41,3 +41,12 @@ nosetests.xml
 python
 Shapefile*
 *db
+*.dbf
+*.prj
+*.shp
+*.shx
+
+old/
+delinquent/
+delinquent.zip
+reapitems.csv
