@@ -15,7 +15,7 @@ class ReapSpider(scrapy.Spider):
     name = 'reap'
     allowed_domains = ['mctreas.org','mcohio.org']
     start_urls = [
-        'http://www.mcohio.org/mctreas/fdpopup.cfm?dtype=DQ'
+        'http://www.mctreas.org/fdpopup.cfm?dtype=DQ'
     ]
 
     def parse(self, response):
@@ -47,10 +47,10 @@ class ReapSpider(scrapy.Spider):
         sel = Selector(response)
 
         item = response.meta['item']
-        item['tax_eligible'] = re.sub('&nbsp', '', sel.xpath('//*[@id="content_middle_wide"]/table[2]/tr/td/table[3]/tr[2]/td[1]/text()').extract()[0]).strip()
-        if item['tax_eligible'] == 'Eligible':
-            item['tax_eligible'] = re.sub('&nbsp', '', sel.xpath('//*[@id="content_middle_wide"]/table[2]/tr/td/table[3]/tr[2]/td[2]/text()').extract()[0]).strip()
-        request = scrapy.Request(response.url.replace('master.cfm', 'pymtsbusdate.cfm'), callback=self.getPaymentPlan)
+        item['taxeligible'] = re.sub('&nbsp', '', sel.xpath("//*[@class='main-wrap clearfix']/div[@class='entry col-md-9']/article[@class='post clearfix']/table[2]/tr/td/table[3]/tr[2]/td[1]/text()").extract()[0]).strip()
+        if item['taxeligible'] == 'Eligible':
+            item['taxeligible'] = re.sub('&nbsp', '', sel.xpath("//*[@class='main-wrap clearfix']/div[@class='entry col-md-9']/article[@class='post clearfix']/table[2]/tr/td/table[3]/tr[2]/td[2]/text()").extract()[0]).strip()
+        request = scrapy.Request(response.url.replace('master.cfm', 'taxes.cfm'), callback=self.getPaymentPlan)
         request.meta['item'] = item
 
         return request
@@ -58,16 +58,44 @@ class ReapSpider(scrapy.Spider):
     def getPaymentPlan(self, response):
         sel = Selector(response)
         item = response.meta['item']
-        item['payment_plan'] = False
-        
-        for paymentXPath in sel.xpath('//*[@id="content_middle_wide"]/div[3]/form/table/tr'):
-            data = paymentXPath.xpath('./td/text()').extract()
-            # if not an empty list, nor different size than 2, since the date might be omitted
-            if data and len(data) == 2:
-                date = datetime.strptime(data[0].strip(), '%m-%d-%Y')
-                payment =  Decimal(re.sub(r'[^\d.]', '', data[1]))
-                if date.year > datetime.today().year - 3 and payment > 0:
-                    item['payment_plan'] = True
+        item['paymentplan'] = False
+        item['paymentwindow'] = False
+        for paymentplan in sel.xpath("//*[@class='main-wrap clearfix']/div[@class='entry col-md-9']/article[@class='post clearfix']/div/form/div[1]/font/font/b/text()").extract():
+            item['paymentplan'] = 'Unapplied Payments:' in paymentplan or item['paymentplan']
+        firstYear = None
+        thisYear = 2015
+        item['lastYear'] = thisYear 
+        rows = sel.xpath('//form/table[4]')
+        for tr in rows.xpath('tr'):
+            val = tr.xpath('td[1]/text()').extract()
+            if len(val) == 1:
+                year = int(val[0])
+            else:
+                continue
+            if firstYear is None:
+                item['lastYear'] = year - 1 
+                firstYear = year - 1
+            # Data points
+            # td[2]/text() is 'Real/Project' - 'real' represents tax data that we care about
+            # td[5]/text() is 'Payments' - how we tell if a payment was made
+            valType = tr.xpath('td[2]/b/text()').extract()
+            val = tr.xpath('td[5]/text()').extract()
+            valDue = tr.xpath('td[6]/text()').extract()
+            #print('first values', len(valType), valType)
+            if len(valType) == 1 and valType[0] == u'Real\xa0':
+                #print('values', valType[0], thisYear, year, val[0])
+                #inspect_response(response, self)
+                # Rules:
+                # Last two full tax years (current year - 2 & current year - 3) have no payments
+                if (year == thisYear - 2 or year == thisYear - 3) and len(val) == 1 and "$0.00" not in val[0]:
+                    item['paymentwindow'] = True;
+                if len(val) == 1 and "$0.00" not in val[0] and len(valDue) == 1 and "$0.00" in valDue[0]:
+                    item['lastYear'] = year
+                elif len(val) == 1 and "$0.00" not in val[0]:
+                    item['lastYear'] = year - 1
+            else:
+                continue
+
         reapitems = csv.writer(open('reapitems.csv', 'ab'), delimiter=',', quoting=csv.QUOTE_MINIMAL)
         reapitems.writerow([item['parcel_id'], item['parcel_location'], item['tax_eligible'], item['payment_plan']])
 
