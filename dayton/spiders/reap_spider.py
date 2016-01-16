@@ -1,13 +1,15 @@
 import scrapy
 from scrapy.http import FormRequest
 from scrapy.selector import Selector
-from tutorial.items import ReapItem
+from dayton.items import ReapItem
 import urllib
 from urllib2 import urlparse
+from decimal import Decimal
 import zipfile
 import glob
 import csv
 import re
+from datetime import datetime
 
 class ReapSpider(scrapy.Spider):
     name = 'reap'
@@ -34,10 +36,10 @@ class ReapSpider(scrapy.Spider):
                     parcellocationcol = idx
             for row in csvreader:
                 item = ReapItem()
-                item['parcelid'] = re.sub('["]', "", row[parcelidcol]).strip()
-                item['parcellocation'] = row[parcellocationcol].strip()
-                if item['parcelid'].startswith('R72'):
-                    request = scrapy.Request("http://mctreas.org/master.cfm?parid=" + item['parcelid'] + "&taxyr=2014" + "&own1=" + row[ownernamecol] + '\n', callback=self.getTaxEligibility)
+                item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
+                item['parcel_location'] = row[parcellocationcol].strip()
+                if item['parcel_id'].startswith('R72'):
+                    request = scrapy.Request("http://mctreas.org/master.cfm?parid=" + item['parcel_id'] + "&taxyr=2014" + "&own1=" + row[ownernamecol] + '\n', callback=self.getTaxEligibility)
                     request.meta['item'] = item
                     yield request
 
@@ -95,7 +97,7 @@ class ReapSpider(scrapy.Spider):
                 continue
 
         reapitems = csv.writer(open('reapitems.csv', 'ab'), delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        reapitems.writerow([item['parcelid'], item['parcellocation'], item['taxeligible'], item['paymentplan']])
+        reapitems.writerow([item['parcel_id'], item['parcel_location'], item['tax_eligible'], item['payment_plan']])
 
 # shamelessly copied from a stack overflow post
 def unzip(source_filename, dest_dir):
