@@ -45,3 +45,5 @@ class ReapItem(scrapy.Item):
     tax_eligible = scrapy.Field()
     payment_plan = scrapy.Field()
     date_eligible = scrapy.Field()
+    payment_window = scrapy.Field()
+    lastYear = scrapy.Field()

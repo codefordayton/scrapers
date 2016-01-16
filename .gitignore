@@ -41,3 +41,10 @@ nosetests.xml
 python
 Shapefile*
 *db
+parcel.*
+
+env/
+olddata/
+delinquent/
+delinquent.zip
+
