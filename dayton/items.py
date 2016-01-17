@@ -2,7 +2,7 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
-
+import scrapy
 from scrapy.item import Item, Field
 
 class DaytonlocalItem(Item):
@@ -40,7 +40,10 @@ class DaytonChamberItem(Item):
     contact_title = Field()
 
 class ReapItem(scrapy.Item):
-    parcelid = scrapy.Field()
-    parcellocation = scrapy.Field()
-    taxeligible = scrapy.Field()
-    paymentplan = scrapy.Field()
+    parcel_id = scrapy.Field()
+    parcel_location = scrapy.Field()
+    tax_eligible = scrapy.Field()
+    payment_plan = scrapy.Field()
+    date_eligible = scrapy.Field()
+    payment_window = scrapy.Field()
+    lastYear = scrapy.Field()
