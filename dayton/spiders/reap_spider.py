@@ -81,7 +81,7 @@ class ReapSpider(scrapy.Spider):
                 item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
                 item['parcel_location'] = row[parcellocationcol].strip()
                 item['parcel_class'] = row[parcelclass].strip()
-                if not item['parcel_id'].startswith('R72'):
+                if item['parcel_id'].startswith('R72'):
                     request = scrapy.Request(
                         "http://mctreas.org/master.cfm?parid={0}&taxyr={1}&own1={2}".format(
                             item['parcel_id'], str(YEAR - 1), row[ownernamecol]),
