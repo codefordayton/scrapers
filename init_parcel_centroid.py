@@ -1,4 +1,4 @@
-#!../venv/bin/python
+#!../env/bin/python
 """
 Given a parcel lines shapefile downloaded from
 http://www.mcauditor.org/downloads/gis_download_shape.cfm,
@@ -12,6 +12,7 @@ this Python script creates a centroids.dbm file that contains the following
 (key,value) pairs:
     key: Shapefile record 'taxpinno'
     value: Shapefile shape bounding box centroid (latitude, longitude)"""
+
 import dbm
 import numpy as np
 import re
@@ -94,6 +95,7 @@ def init_parcel_centroid(argv):
 
     Returns:
         None"""
+
     shapefileobj = shapefile.Reader(argv[1])
 
     fields = [re.sub("_", "", field[0].lower())\
@@ -107,14 +109,14 @@ def init_parcel_centroid(argv):
 
         record['name'] = record['name'].lower()
 
-        if re.match('^R72$', record['taxdistric']):
+        #if re.match('^R72$', record['taxdistric']):
 
-            if not is_government(record['name']):
-                bbox = np.array(shape_record.shape.bbox)
+        if not is_government(record['name']):
+            bbox = np.array(shape_record.shape.bbox)
 
-                centroids[record['taxpinno']] =\
-                    "%f %f" % (np.mean(bbox[1:4:2]),\
-                               np.mean(bbox[0:4:2]))
+            centroids[record['taxpinno']] =\
+                "%f %f" % (np.mean(bbox[1:4:2]),\
+                           np.mean(bbox[0:4:2]))
 
     centroids.close()
 
