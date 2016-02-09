@@ -74,10 +74,13 @@ class ReapSpider(scrapy.Spider):
                     ownernamecol = idx
                 if column.startswith("PARCELLOCATION"):
                     parcellocationcol = idx
+                if column.startswith("CLS"):
+                    parcelclass = idx
             for row in csvreader:
                 item = ReapItem()
                 item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
                 item['parcel_location'] = row[parcellocationcol].strip()
+                item['parcel_class'] = row[parcelclass].strip()
                 if item['parcel_id'].startswith('R72'):
                     request = scrapy.Request(
                         "http://mctreas.org/master.cfm?parid={0}&taxyr={1}&own1={2}".format(
@@ -150,7 +153,8 @@ class ReapSpider(scrapy.Spider):
             item['tax_eligible'],
             item['payment_plan'],
             item['lastYear'],
-            item['payment_window']])
+            item['payment_window'],
+            item['parcel_class']])
 
 def unzip(source_filename, dest_dir):
     """

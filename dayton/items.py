@@ -47,3 +47,4 @@ class ReapItem(scrapy.Item):
     date_eligible = scrapy.Field()
     payment_window = scrapy.Field()
     lastYear = scrapy.Field()
+    parcel_class = scrapy.Field()
