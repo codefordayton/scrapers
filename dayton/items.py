@@ -48,3 +48,4 @@ class ReapItem(scrapy.Item):
     payment_window = scrapy.Field()
     lastYear = scrapy.Field()
     parcel_class = scrapy.Field()
+    building_value = scrapy.Field()
