@@ -76,14 +76,17 @@ class ReapSpider(scrapy.Spider):
                     parcellocationcol = idx
                 if column.startswith("CLS"):
                     parcelclass = idx
+                if column.startswith("ASMTBLDG"):
+                    buildingvalue = idx
             for row in csvreader:
                 item = ReapItem()
                 item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
                 item['parcel_location'] = row[parcellocationcol].strip()
                 item['parcel_class'] = row[parcelclass].strip()
+                item['building_value'] = row[buildingvalue].strip()
                 request = scrapy.Request(
                     "http://mctreas.org/master.cfm?parid={0}&taxyr={1}&own1={2}".format(
-                        item['parcel_id'], str(YEAR - 1), row[ownernamecol]),
+                        item['parcel_id'], str(YEAR), row[ownernamecol]),
                     callback=self.get_tax_eligibility)
                 request.meta['item'] = item
                 yield request
@@ -111,7 +114,7 @@ class ReapSpider(scrapy.Spider):
         item['lastYear'] = YEAR
 
         for paymentplan in sel.xpath(PAYMENT_PLAN_XPATH).extract():
-            item['payment_plan'] = 'Unapplied Payments:' in paymentplan or item['payment_plan']
+            item['payment_plan'] = 'Delinquent Contract' in paymentplan or item['payment_plan']
         first_year = None
         rows = sel.xpath('//form/table[4]')
         #inspect_response(response, self)
@@ -153,7 +156,8 @@ class ReapSpider(scrapy.Spider):
             item['payment_plan'],
             item['lastYear'],
             item['payment_window'],
-            item['parcel_class']])
+            item['parcel_class'],
+            item['building_value']])
 
 def unzip(source_filename, dest_dir):
     """
