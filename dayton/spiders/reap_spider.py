@@ -10,11 +10,11 @@ from scrapy.selector import Selector
 from dayton.items import ReapItem
 from scrapy.shell import inspect_response
 
-YEAR = 2016
+YEAR = 2017
 BASE_XPATH = "//*[@class='main-wrap clearfix']/div[@class='entry col-md-9']/article[@class='post clearfix']"
 TAX_ELIGIBLE_XPATH = BASE_XPATH + "/table[2]/tr/td/table[3]/tr[2]/td[1]/text()"
 TAX_ELIGIBLE_XPATH2 = BASE_XPATH + "/table[2]/tr/td/table[3]/tr[2]/td[2]/text()"
-PAYMENT_PLAN_XPATH = BASE_XPATH + "/div/form/div[1]/tr/td/font/font/b/text()"
+PAYMENT_PLAN_XPATH = BASE_XPATH + "/div/form/div[1]/tr/td/font/text()"
 AMOUNT_DUE_XPATH = BASE_XPATH + "/div/form/table[4]/tr[last()]/td[last()]/b/text()"
 
 def year_in_range(year):

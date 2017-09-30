@@ -107,14 +107,10 @@ def init_parcel_centroid(argv):
         record = initialize_record(fields,\
                                    shape_record)
 
-        record['name'] = record['name'].lower()
-
-        #if re.match('^R72$', record['taxdistric']):
-
-        if not is_government(record['name']):
+        if (shape_record.shape and shape_record.shape.shapeType != 0):
             bbox = np.array(shape_record.shape.bbox)
-
-            centroids[record['taxpinno']] =\
+            parcelid = record['taxpinno'].replace(" ", "")
+            centroids[parcelid] =\
                 "%f %f" % (np.mean(bbox[1:4:2]),\
                            np.mean(bbox[0:4:2]))
 
