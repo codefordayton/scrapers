@@ -46,12 +46,7 @@ class DaytonChamberSpider(Spider):
             for row in rows:
                 key = row.css('div.leftcol').xpath('./text()').extract()
 
-                #TODO remove
-                print "key = %s"% key
-
                 if len(key) == 0:
-                    #TODO remove
-                    print "no key found"
                     # No key, so don't bother looking for a value
                     continue
 
@@ -65,9 +60,6 @@ class DaytonChamberSpider(Spider):
                     value = row.css('div.rightcol').xpath('./text()').extract()
 
                 if len(value) == 0:
-                    #TODO remove
-                    print "no value found"
-
                     #No value, so don't bother storing
                     continue
 
@@ -100,8 +92,6 @@ class DaytonChamberSpider(Spider):
 
             items.append(item)
 
-            #TODO remove
-            print row_dict
             break
 
         return items
@@ -115,4 +105,4 @@ if __name__ == '__main__':
         request = Request(url='http://localhost')
         response = XmlResponse(url='http://localhost', request=request, body=f.read(), encoding='utf-8')
 
-    print DaytonChamberSpider.extract(DaytonChamberSpider(), response=response)
+    print(DaytonChamberSpider.extract(DaytonChamberSpider(), response=response))
