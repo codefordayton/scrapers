@@ -5,19 +5,21 @@ This project collects data from various City of Dayton area websites to power ou
 
 Installation
 ===================
-First, [install Vagrant for your host operating system](http://www.vagrantup.com/downloads.html). Vagrant runs virtual machines inside VirtualBox on your host OS. We use
-a common image and configure it using Vagrant (Puppet) so that all developers have the same runtime environment.
+The application runs in a Python 3.x virtualenv. To create a python virtualenv, run:
 
-To start the virtual machine type
-```vagrant up```
+`virtualenv env -ppython3`
 
-Wait for installation and setup to complete (several minutes), then SSH into the virtual machine, start the virtual environment
-and change to the synced folder
-```
-vagrant ssh
-source ~/virtenv/bin/activate
-cd /vagrant
-```
+After creating the virtual environment, activate it with:
+
+`. env/bin/activate`
+
+All commands after this assume you are inside the virtual environment for the project you are working on.
+
+Dependencies for the projects can be installed via:
+
+`pip install -r requirements.txt`
+
+The `requirements.txt` file contains all the packages that the project depends upon. New requirements should be added to this file, either manually or by running `pip freeze > requirements.txt`.
 
 Crawling
 ===================
