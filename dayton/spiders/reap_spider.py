@@ -1,5 +1,4 @@
-import urllib
-from urllib2 import urlparse
+import urllib.request
 import zipfile
 import glob
 import csv
@@ -61,12 +60,13 @@ class ReapSpider(scrapy.Spider):
     def parse(self, response):
         delinquent_link = Selector(response).xpath(
             '//*[@id="box1"]/td[1]/li/font/i/a/@href').extract()
-        urllib.urlretrieve(urlparse.urljoin(response.url, delinquent_link[0]), 'delinquent.zip')
+        urllib.request.urlretrieve(response.urljoin(delinquent_link[0]), 'delinquent.zip')
         unzip('delinquent.zip', 'delinquent')
 
-        with open(glob.glob('delinquent/*.csv')[0], 'rb') as csvfile:
+        with open(glob.glob('delinquent/*.csv')[0], 'rt') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',')
-            for idx, column in enumerate(csvreader.next()):
+            headers = next(csvreader)
+            for idx, column in enumerate(headers):
                 column = re.sub('["]', "", column).strip()
                 if column.startswith("PARCELID"):
                     parcelidcol = idx
@@ -147,7 +147,7 @@ class ReapSpider(scrapy.Spider):
                 else:
                     continue
 
-        reapitems = csv.writer(open('reapitems.csv', 'ab'),
+        reapitems = csv.writer(open('reapitems.csv', 'at'),
                                delimiter=',', quoting=csv.QUOTE_MINIMAL)
         reapitems.writerow([
             item['parcel_id'],

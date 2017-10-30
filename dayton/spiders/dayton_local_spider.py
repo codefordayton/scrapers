@@ -92,9 +92,9 @@ class DaytonLocalSpider(Spider):
                     p = phonenumbers.parse(phone[0], 'US')
                     p = phonenumbers.normalize_digits_only(p)
                     item['phone'] = p
-                except Exception, e:
+                except Exception as e:
                     item['phone'] = None
-                    print e
+                    print(e)
 
             if len(special_divs) >=3:
                 descr = special_divs[2].xpath('text()').extract()
@@ -137,5 +137,5 @@ if __name__ == '__main__':
         request = Request(url=url)
         response = HtmlResponse(url=url, request=request, body=requests.get(url).text, encoding='utf-8')
 
-        print DaytonLocalSpider.extract(DaytonLocalSpider(), response=response)
+        print(DaytonLocalSpider.extract(DaytonLocalSpider(), response=response))
 
