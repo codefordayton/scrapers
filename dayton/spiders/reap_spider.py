@@ -1,3 +1,4 @@
+import datetime
 import urllib.request
 import zipfile
 import glob
@@ -9,15 +10,32 @@ from scrapy.selector import Selector
 from dayton.items import ReapItem
 from scrapy.shell import inspect_response
 
-YEAR = 2017
+this_year = None
+extended_year = False
+
 BASE_XPATH = "//*[@class='main-wrap clearfix']/div[@class='entry col-md-9']/article[@class='post clearfix']"
 TAX_ELIGIBLE_XPATH = BASE_XPATH + "/table[2]/tr/td/table[3]/tr[2]/td[1]/text()"
 TAX_ELIGIBLE_XPATH2 = BASE_XPATH + "/table[2]/tr/td/table[3]/tr[2]/td[2]/text()"
 PAYMENT_PLAN_XPATH = BASE_XPATH + "/div/form/div[1]/tr/td/font/text()"
 AMOUNT_DUE_XPATH = BASE_XPATH + "/div/form/table[4]/tr[last()]/td[last()]/b/text()"
 
+def fiscal_year():
+    today = datetime.datetime.now()
+    global this_year
+    global extended_year
+    if this_year is None and today.month >= 9:
+        this_year = today.year
+        extended_year = True
+    elif this_year is None:
+        this_year = today.year - 1
+    return this_year
+
 def year_in_range(year):
-    return year == YEAR - 2 or year == YEAR - 3
+    if extended_year:
+        return year == fiscal_year() - 2 or year == fiscal_year() - 3
+    else:
+        return year == fiscal_year() - 1 or year == fiscal_year() - 2
+
 
 def single(array):
     return len(array) == 1
@@ -52,6 +70,7 @@ def is_zero_due(sel):
 
 class ReapSpider(scrapy.Spider):
     name = 'reap'
+    fiscal_year()
     allowed_domains = ['mctreas.org', 'mcohio.org']
     start_urls = [
         'http://www.mctreas.org/fdpopup.cfm?dtype=DQ'
@@ -86,7 +105,7 @@ class ReapSpider(scrapy.Spider):
                 item['building_value'] = row[buildingvalue].strip()
                 request = scrapy.Request(
                     "http://mctreas.org/master.cfm?parid={0}&taxyr={1}&own1={2}".format(
-                        item['parcel_id'], str(YEAR), row[ownernamecol]),
+                        item['parcel_id'], str(fiscal_year()), row[ownernamecol]),
                     callback=self.get_tax_eligibility)
                 request.meta['item'] = item
                 yield request
@@ -111,7 +130,7 @@ class ReapSpider(scrapy.Spider):
         item = response.meta['item']
         item['payment_plan'] = False
         item['payment_window'] = False
-        item['lastYear'] = YEAR
+        item['lastYear'] = fiscal_year()
 
         for paymentplan in sel.xpath(PAYMENT_PLAN_XPATH).extract():
             item['payment_plan'] = 'Delinquent Contract' in paymentplan or item['payment_plan']
