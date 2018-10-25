@@ -1,4 +1,4 @@
-#!../venv/bin/python
+#!env/bin/python
 """ Splits a reapitems.csv into city and county properties """
 import csv
 import re

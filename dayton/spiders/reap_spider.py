@@ -136,7 +136,7 @@ class ReapSpider(scrapy.Spider):
             item['payment_plan'] = 'Delinquent Contract' in paymentplan or item['payment_plan']
         first_year = None
         rows = sel.xpath('//form/table[4]')
-        #inspect_response(response, self)
+
         if is_zero_due(sel):
             item['payment_window'] = True
         else:
@@ -166,7 +166,7 @@ class ReapSpider(scrapy.Spider):
                 else:
                     continue
 
-        reapitems = csv.writer(open('reapitems.csv', 'at'),
+        reapitems = csv.writer(open('reapitems.csv', 'w'),
                                delimiter=',', quoting=csv.QUOTE_MINIMAL)
         reapitems.writerow([
             item['parcel_id'],

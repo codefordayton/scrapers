@@ -36,7 +36,7 @@ def initialize_record(fields,\
     for idx in range(0, len(fields)):
         record[fields[idx]] = shape_record.record[idx]
 
-        if isinstance(record[fields[idx]], basestring):
+        if isinstance(record[fields[idx]], str):
             record[fields[idx]] =\
                 re.sub("\\s+", " ", record[fields[idx]])
 
@@ -106,13 +106,12 @@ def init_parcel_centroid(argv):
     for shape_record in shapefileobj.shapeRecords():
         record = initialize_record(fields,\
                                    shape_record)
-
         if (shape_record.shape and shape_record.shape.shapeType != 0):
             bbox = np.array(shape_record.shape.bbox)
             parcelid = record['taxpinno'].replace(" ", "")
             centroids[parcelid] =\
-                "%f %f" % (np.mean(bbox[1:4:2]),\
-                           np.mean(bbox[0:4:2]))
+                "%f %f %s" % (np.mean(bbox[1:4:2]),\
+                              np.mean(bbox[0:4:2]), record['locarea'])
 
     centroids.close()
 
@@ -120,6 +119,5 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         init_parcel_centroid(sys.argv)
     else:
-        print "Usage: init_parcel_centroid.py " +\
-              "<parcellines shapefile basename>"
+        print("Usage: init_parcel_centroid.py <parcellines shapefile basename>")
 
