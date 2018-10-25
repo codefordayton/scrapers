@@ -42,6 +42,11 @@ python
 Shapefile*
 *db
 parcel.*
+*.csv
+*.dbf
+*.prj
+*.shp
+*.shx
 
 env/
 olddata/

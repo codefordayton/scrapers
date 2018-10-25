@@ -3,3 +3,5 @@ lxml
 cssselect
 scrapy
 phonenumbers
+numpy
+pyshp
