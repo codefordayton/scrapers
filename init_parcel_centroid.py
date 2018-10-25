@@ -19,8 +19,8 @@ import re
 import shapefile
 import sys
 
-def initialize_record(fields,\
-                      shape_record):
+
+def initialize_record(fields, shape_record):
     """Initializes a dictionary that stores a shapefile record.
 
     Args:
@@ -42,6 +42,7 @@ def initialize_record(fields,\
 
     return record
 
+
 def is_government(name):
     """Returns a boolean that keeps track of whether or not a shapefile record
     is associated with a local, county, or state government.
@@ -56,18 +57,19 @@ def is_government(name):
 
     is_government_flag = False
 
-    government_regex = ['^city of dayton.*$',\
-                        '^board of county commissioners$',\
-                        '^dayton mont co public$',\
-                        '^dayton, city of$',\
-                        '^miami conservancy district$',\
+    government_regex = ['^city of dayton.*$',
+                        '^board of county commissioners$',
+                        '^dayton mont co public$',
+                        '^dayton, city of$',
+                        '^miami conservancy district$',
                         '^state of ohio.*$']
 
     for regex in government_regex:
         is_government_flag =\
-            is_government_flag | (re.match(regex, name) != None)
+            is_government_flag | (re.match(regex, name) is not None)
 
     return is_government_flag
+
 
 def init_parcel_centroid(argv):
     """Given a parcel lines shapefile downloaded from
@@ -98,26 +100,25 @@ def init_parcel_centroid(argv):
 
     shapefileobj = shapefile.Reader(argv[1])
 
-    fields = [re.sub("_", "", field[0].lower())\
+    fields = [re.sub("_", "", field[0].lower())
               for field in shapefileobj.fields[1:]]
 
     centroids = dbm.open("centroids.dbm", "c")
 
     for shape_record in shapefileobj.shapeRecords():
-        record = initialize_record(fields,\
-                                   shape_record)
+        record = initialize_record(fields, shape_record)
         if (shape_record.shape and shape_record.shape.shapeType != 0):
             bbox = np.array(shape_record.shape.bbox)
             parcelid = record['taxpinno'].replace(" ", "")
             centroids[parcelid] =\
-                "%f %f %s" % (np.mean(bbox[1:4:2]),\
+                "%f %f %s" % (np.mean(bbox[1:4:2]),
                               np.mean(bbox[0:4:2]), record['locarea'])
 
     centroids.close()
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         init_parcel_centroid(sys.argv)
     else:
-        print("Usage: init_parcel_centroid.py <parcellines shapefile basename>")
-
+        print("Usage: init_parcel_centroid.py <parcellines shapefile name>")

@@ -5,6 +5,7 @@
 import scrapy
 from scrapy.item import Item, Field
 
+
 class DaytonlocalItem(Item):
     name = Field()
     website = Field()
@@ -22,11 +23,13 @@ class DaytonlocalItem(Item):
     data_source_url = Field()
     retrieved_on = Field()
 
+
 class DaytonOhioPDFItem(Item):
     title = Field()
     url = Field()
     author = Field()
     pubDate = Field()
+
 
 class DaytonChamberItem(Item):
     name = Field()
@@ -38,6 +41,7 @@ class DaytonChamberItem(Item):
     retrieved_on = Field()
     contact_name = Field()
     contact_title = Field()
+
 
 class ReapItem(scrapy.Item):
     parcel_id = scrapy.Field()

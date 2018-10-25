@@ -47,6 +47,7 @@ parcel.*
 *.prj
 *.shp
 *.shx
+*.swp
 
 env/
 olddata/

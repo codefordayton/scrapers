@@ -3,6 +3,7 @@
 import csv
 import re
 
+
 def split_reap_items():
     """ Splits the reapitems.csv into into city and county properties
 
@@ -22,7 +23,7 @@ def split_reap_items():
     countywriterobj = csv.writer(h_county)
 
     for line in reader:
-        if patternobj.match(line[0]) != None:
+        if patternobj.match(line[0]) is not None:
             citywriterobj.writerow(line)
         else:
             countywriterobj.writerow(line)
@@ -30,6 +31,7 @@ def split_reap_items():
     h_in.close()
     h_city.close()
     h_county.close()
+
 
 if __name__ == "__main__":
     split_reap_items()
