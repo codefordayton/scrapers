@@ -29,7 +29,5 @@ You can view the available spiders by running
 
 You can start the crawling using the below command:
 ```
-scrapy crawl spider_name
+scrapy runspider spider_name
 ```
-
-Scraped data is output as JSON in 'feed.json'

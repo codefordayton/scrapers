@@ -30,14 +30,16 @@ class DaytonChamberSpider(Spider):
 
         items = []
 
-        containers = sel.xpath('//div[@id="membersearchresults"]//div[@id="container"]')
+        containers = sel.xpath(
+            '//div[@id="membersearchresults"]//div[@id="container"]')
 
         for container in containers:
 
             item = DaytonChamberItem()
 
             item['data_source_url'] = response.url
-            item['retrieved_on'] = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+            item['retrieved_on'] = datetime.datetime.now().strftime(
+                "%I:%M%p on %B %d, %Y")
 
             rows = container.css('div.row')
 
@@ -53,42 +55,38 @@ class DaytonChamberSpider(Spider):
                 key = key[0].strip()
 
                 if key == 'Business Name:':
-                    value = row.css('div.rightcol').xpath('./strong/text()').extract()
+                    value = row.css(
+                        'div.rightcol').xpath('./strong/text()').extract()
                 elif key == 'Website:':
                     value = row.xpath('./a/ @href').extract()
                 else:
                     value = row.css('div.rightcol').xpath('./text()').extract()
 
                 if len(value) == 0:
-                    #No value, so don't bother storing
+                    # No value, so don't bother storing
                     continue
 
                 value = value[0].strip()
 
-                #Finally store the results in the dict
+                # Finally store the results in the dict
                 row_dict[key] = value
-
 
             item['name'] = row_dict.get('Business Name:', None)
             item['category'] = row_dict.get('Business Category:', None)
             item['contact_name'] = row_dict.get('Contact Name:', None)
             item['contact_title'] = row_dict.get('Contact Title:', None)
-            item['address']= row_dict.get('Address:', None)
+            item['address'] = row_dict.get('Address:', None)
             item['website'] = row_dict.get('Website:', None)
 
-            #Normalize phone numbers
+            # Normalize phone numbers
             try:
                 p_original = row_dict.get('Phone Number:', None)
                 p = phonenumbers.parse(p_original, 'US')
                 p = phonenumbers.normalize_digits_only(p)
                 item['phone'] = p
             except Exception:
-                #Non-standard phone, so just going to store the original
+                # Non-standard phone, so just going to store the original
                 item['phone'] = p_original
-
-            #TODO remove
-            # from scrapy.shell import inspect_response
-            # inspect_response(response)
 
             items.append(item)
 
@@ -96,13 +94,16 @@ class DaytonChamberSpider(Spider):
 
         return items
 
+
 if __name__ == '__main__':
     from scrapy.http import Request
     from scrapy.http.response.xml import XmlResponse
 
-
     with open('./text.html', 'r') as f:
         request = Request(url='http://localhost')
-        response = XmlResponse(url='http://localhost', request=request, body=f.read(), encoding='utf-8')
+        response = XmlResponse(url='http://localhost',
+                               request=request, body=f.read(),
+                               encoding='utf-8')
 
-    print(DaytonChamberSpider.extract(DaytonChamberSpider(), response=response))
+    print(DaytonChamberSpider.extract(DaytonChamberSpider(),
+                                      response=response))
