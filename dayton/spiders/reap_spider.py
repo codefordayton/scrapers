@@ -18,14 +18,14 @@ TAX_ELIGIBLE = BASE + "/table[2]/tr/td/table[3]/tr[2]/td[1]/text()"
 TAX_ELIGIBLE_2 = BASE + "/table[2]/tr/td/table[3]/tr[2]/td[2]/text()"
 PAYMENT_PLAN = BASE + "/div/form/div[1]/tr/td/font/text()"
 AMOUNT_DUE = BASE + "/div/form/table[4]/tr[last()]/td[last()]/b/text()"
-URL = "http://mctreas.org/master.cfm?parid={0}&taxyr={1}&own1={2}"
+URL = "https://www.mcohio.org/government/elected_officials/treasurer/mctreas/master.cfm?parid={0}&taxyr={1}&own1={2}"
 
 
 def fiscal_year():
     today = datetime.datetime.now()
     global this_year
     global extended_year
-    if this_year is None and today.month >= 9:
+    if this_year is None and today.month >= 10:
         this_year = today.year
         extended_year = True
     elif this_year is None:
@@ -86,7 +86,7 @@ class ReapSpider(scrapy.Spider):
     fiscal_year()
     allowed_domains = ['mctreas.org', 'mcohio.org']
     start_urls = [
-        'http://www.mctreas.org/fdpopup.cfm?dtype=DQ'
+        'http://www.mctreas.org/mctreas/fdpopup.cfm?dtype=DQ'
     ]
 
     def parse(self, response):
@@ -112,18 +112,19 @@ class ReapSpider(scrapy.Spider):
                 if column.startswith("ASMTBLDG"):
                     buildingvalue = idx
             for row in csvreader:
-                item = ReapItem()
-                item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
-                item['parcel_location'] = row[parcellocationcol].strip()
-                item['parcel_class'] = row[parcelclass].strip()
-                item['building_value'] = row[buildingvalue].strip()
-                request = scrapy.Request(URL.format(
-                        item['parcel_id'],
-                        str(fiscal_year()),
-                        row[ownernamecol]),
-                    callback=self.get_tax_eligibility)
-                request.meta['item'] = item
-                yield request
+                if (len(row) > ownernamecol):
+                    item = ReapItem()
+                    item['parcel_id'] = re.sub('["]', "", row[parcelidcol]).strip()
+                    item['parcel_location'] = row[parcellocationcol].strip()
+                    item['parcel_class'] = row[parcelclass].strip()
+                    item['building_value'] = row[buildingvalue].strip()
+                    request = scrapy.Request(URL.format(
+                            item['parcel_id'],
+                            str(fiscal_year()),
+                            row[ownernamecol]),
+                        callback=self.get_tax_eligibility)
+                    request.meta['item'] = item
+                    yield request
 
     def get_tax_eligibility(self, response):
         sel = Selector(response)
@@ -174,16 +175,16 @@ class ReapSpider(scrapy.Spider):
                     # Rules:
                     # Last two full tax years have no payments
                     if year_in_range(year) and (
-                            single_real(val_paid) or single_zero(val_due)):
+                            (single(val_paid) and not zero(val_paid)) or (single_zero(val_due))):
                         item['payment_window'] = True
-                    if single_real(val_paid) and single_zero(val_due):
+                    if single(val_paid) and not zero(val_paid) and single_zero(val_due):
                         item['lastYear'] = year
                     elif single(val_paid) and not zero(val_paid):
                         item['lastYear'] = year - 1
                 else:
                     continue
 
-        reapitems = csv.writer(open('reapitems.csv', 'w'),
+        reapitems = csv.writer(open('reapitems.csv', 'a'),
                                delimiter=',', quoting=csv.QUOTE_MINIMAL)
         reapitems.writerow([
             item['parcel_id'],
