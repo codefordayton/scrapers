@@ -53,4 +53,5 @@ env/
 olddata/
 delinquent/
 delinquent.zip
-
+shapefiles/
+shapefiles.zip

@@ -6,7 +6,7 @@ rm shapefiles.zip
 mkdir data
 
 echo Downloading shapefiles.
-curl -o shapefiles.zip http://www.mcauditor.org/downloads/Shape_files/SHAPEFILE_PARCELLINES_ROW_OLDLOT.ZIP
+curl -o shapefiles.zip http://www.mcauditor.org/downloads/Shape_files/SHAPEFILES_PARCELLINES_ROW_OLDLOT.zip
 
 echo Unzipping the files.
 unzip shapefiles.zip -d shapefiles
