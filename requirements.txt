@@ -5,3 +5,4 @@ scrapy
 phonenumbers
 numpy
 pyshp
+pandas
