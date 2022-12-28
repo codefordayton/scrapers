@@ -47,38 +47,42 @@ class DelinquencySpider(scrapy.Spider):
         with open(self.DAYTON_DELINQUENT_PROPERTIES_OUTFILE, mode="w") as out_file:
             with open(glob.glob('delinquent/*.csv')[0], newline='') as delinquent_file:
                 header = delinquent_file.readline()
-                out_file.write(header)
+                fieldnames = header.split(",")
+                fieldnames[-1] = fieldnames[-1].strip("\n\r")
 
-                delinquent_file_reader = csv.reader(delinquent_file)
-                out_file_writer = csv.writer(out_file)
-                value_index = None
-                owed_index = None
-                tax_district_index = None
-                for idx, val in enumerate(header.split(",")):
-                    if val.strip(' "') == "ASMTTOTAL":
-                        value_index = idx
-                    elif val.strip(' "') == "NETDELQ":
-                        owed_index = idx
-                    elif val.strip(' "') == "TXDST":
-                        tax_district_index = idx
+                delinquent_file_reader = csv.DictReader(
+                    delinquent_file,
+                    fieldnames,
+                    dialect=csv.unix_dialect
+                )
 
-                if not all([value_index, owed_index, tax_district_index]):
-                    raise ValueError(
-                        f"One of the indexes wasn't set: "
-                        f"{value_index=} {owed_index=} {tax_district_index=}")
+                fieldnames.append("DELQLESSASMT")
+                out_file_writer = csv.DictWriter(
+                    out_file,
+                    fieldnames,
+                    dialect=csv.unix_dialect
+                )
+                out_file_writer.writeheader()
+
+                lines_written = 0
 
                 for row in delinquent_file_reader:
-                    if len(row) < len(header.split(",")):
+                    if len(row) < len(fieldnames):
                         continue
-                    home_value: str = row[value_index].strip(' "')
-                    tax_owed: str = row[owed_index].strip(' "')
-                    tax_district: str = row[tax_district_index].strip(' "')
+                    if not all([row['ASMTTOTAL       '], row["NETDELQ         "], row['"TXDST"']]):
+                        continue
+
+                    home_value: str = row['ASMTTOTAL       '].strip(' "')
+                    tax_owed: str = row["NETDELQ         "].strip(' "')
+                    tax_district: str = row['"TXDST"'].strip(' "')
                     if not home_value or not tax_owed:
                         continue
                     home_value: float = float(home_value)
                     tax_owed: float = float(tax_owed)
                     is_in_dayton = bool(tax_district) and tax_district == "R72"
                     if home_value and tax_owed and tax_owed > home_value and is_in_dayton:
+                        amount_owed_over_assessed_value = tax_owed - home_value
+                        row["DELQLESSASMT"] = str(amount_owed_over_assessed_value)
                         out_file_writer.writerow(row)
-
+                        lines_written += 1
 
